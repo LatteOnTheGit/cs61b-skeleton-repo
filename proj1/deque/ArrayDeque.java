@@ -120,8 +120,8 @@ public class ArrayDeque<T>{
         if(index > size){
             return null;
         } else {
-            int count = 1;
-            if(lastHelper(nextLast) <= firstHelper(nextFirst)){
+            int count = 0;
+            if(lastHelper(nextLast) < firstHelper(nextFirst)){
                 for(int i = nextFirst + 1; i <= items.length; i++){
                     if(count == index){
                         return items[i];
@@ -136,7 +136,7 @@ public class ArrayDeque<T>{
                 }
                 return null;
             } else {
-                for(int i = nextFirst + 1; i <= nextLast - 1; i++){
+                for(int i = firstHelper(nextFirst); i <= lastHelper(nextLast); i++){
                     if(count == index){
                         return items[i];
                     }

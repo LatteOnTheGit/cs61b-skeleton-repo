@@ -161,7 +161,12 @@ public class ArrayDequeTest {
     }
 
     @Test
-    public void printDequeTest(){
+    public void getTest(){
+        ArrayDeque<Integer> ad1 = new ArrayDeque<Integer>();
+        for(int i = 0; i < 50; i++){
+            ad1.addLast(i);
+            assertEquals("Should have the same value", i, (double) ad1.get(i), 0.0);
+        }
 
     }
 }
