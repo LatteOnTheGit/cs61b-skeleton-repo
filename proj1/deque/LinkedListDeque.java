@@ -1,6 +1,8 @@
 package deque;
 
-public class LinkedListDeque<T> {
+import java.util.Iterator;
+
+public class LinkedListDeque<T> implements Iterable<T>,Deque<T>{
     private int size;
     public DoubleLink sentinel;
 
@@ -34,6 +36,7 @@ public class LinkedListDeque<T> {
         size = 0;
     }
 
+    @Override
     public void addFirst(T item){
         if(isEmpty()){
             sentinel.item = item;
@@ -46,6 +49,7 @@ public class LinkedListDeque<T> {
         }
     }
 
+    @Override
     public void addLast(T item){
         if(isEmpty()){
             sentinel.item = item;
@@ -58,27 +62,27 @@ public class LinkedListDeque<T> {
         }
     }
 
-    public boolean isEmpty(){
-        if(size==0){
-            return true;
-        } else {
-            return false;
-        }
-    }
-
+    @Override
     public int size(){
         return size;
     }
 
+    @Override
     public void printDeque(){
+        StringBuilder returnSB = new StringBuilder();
         if(!isEmpty()){
-            for(DoubleLink i = sentinel.next; i == sentinel; i = i.next){
-                System.out.print(i.item + " ");
+            for(int i = 0; i < size - 1; i++){
+                returnSB.append(this.get(i));
+                returnSB.append(" ");
             }
+            returnSB.append(this.get(size - 1));
+        } else {
+            System.out.println();
         }
-        System.out.println();
+        System.out.println(returnSB);
     }
 
+    @Override
     public T removeFirst(){
         if(isEmpty()){
             return null;
@@ -92,6 +96,7 @@ public class LinkedListDeque<T> {
         }
     }
 
+    @Override
     public T removeLast(){
         if (isEmpty()){
             return null;
@@ -104,16 +109,69 @@ public class LinkedListDeque<T> {
         }
     }
 
+    @Override
     public T get(int index){
         if (index > size){
             return null;
         } else {
             DoubleLink pointer = sentinel.next;
-            for(int i = 1; i < index; i++){
+            for(int i = 0; i < index; i++){
                 pointer = pointer.next;
             }
             return pointer.item;
         }
+    }
+
+    @Override
+    public Iterator<T> iterator(){
+        return new LinkedListDequeIterator();
+    }
+
+    private class LinkedListDequeIterator implements Iterator<T>{
+        private int wizPos;
+
+        public LinkedListDequeIterator(){
+            wizPos = 0;
+        }
+
+        @Override
+        public boolean hasNext(){
+            return wizPos < size;
+        }
+
+        @Override
+        public T next(){
+            T returnItem = get(wizPos);
+            wizPos++;
+            return returnItem;
+        }
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if (o instanceof LinkedListDeque){
+            if (((LinkedListDeque<?>) o).size != size){
+                return false;
+            }
+
+            for (T i:this){
+                if (!((LinkedListDeque<?>) o).containsHelper(i)){
+                    return false;
+                }
+            }
+        } else {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean containsHelper(Object item){
+        for(T i : this){
+            if (item.equals(i)){
+                return true;
+            }
+        }
+        return false;
     }
 
     public T getRecursive(int index){

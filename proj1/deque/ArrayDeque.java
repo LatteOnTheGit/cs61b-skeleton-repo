@@ -1,6 +1,8 @@
 package deque;
 
-public class ArrayDeque<T>{
+import java.util.Iterator;
+
+public class ArrayDeque<T> implements Iterable<T>, Deque<T>{
     private T[] items;
     private int size;
     private int nextFirst;
@@ -13,6 +15,7 @@ public class ArrayDeque<T>{
         nextFirst = items.length-1;
     }
 
+    @Override
     public void addFirst(T item){
         if(size == items.length){
             resize((int) Math.ceil(size * 1.6));
@@ -26,6 +29,7 @@ public class ArrayDeque<T>{
         size++;
     }
 
+    @Override
     public void addLast(T item){
         if(size == items.length){
             resize((int) Math.ceil(size * 1.6));
@@ -52,32 +56,23 @@ public class ArrayDeque<T>{
         items = a;
     }
 
-    public boolean isEmpty(){
-        if(size == 0){
-            return true;
-        } else {
-            return false;
-        }
-    }
-
+    @Override
     public int size(){
         return size;
     }
 
+    @Override
     public void printDeque(){
-        if(!isEmpty()){
-//            print out First
-            for(int index = nextFirst+1; index < items.length; index++){
-                System.out.print(items[index] + " ");
-            }
-//            what if not start at 0?
-            for(int index = 0; index < nextLast; index++){
-                System.out.print(items[index] + " ");
-            }
+        StringBuilder printSB = new StringBuilder();
+        for(int i = 0; i < size - 1; i++){
+            printSB.append(get(i).toString());
+            printSB.append(" ");
         }
-        System.out.println();
+        printSB.append(get(size - 1));
+        System.out.println(printSB);
     }
 
+    @Override
     public T removeFirst(){
         if(isEmpty()){
             return null;
@@ -97,6 +92,7 @@ public class ArrayDeque<T>{
         }
     }
 
+    @Override
     public T removeLast(){
         if(isEmpty()){
             return null;
@@ -116,13 +112,14 @@ public class ArrayDeque<T>{
         }
     }
 
+    @Override
     public T get(int index){
         if(index > size){
             return null;
         } else {
             int count = 0;
             if(lastHelper(nextLast) < firstHelper(nextFirst)){
-                for(int i = nextFirst + 1; i <= items.length; i++){
+                for(int i = nextFirst + 1; i <= items.length - 1; i++){
                     if(count == index){
                         return items[i];
                     }
@@ -145,6 +142,68 @@ public class ArrayDeque<T>{
                 return null;
             }
         }
+    }
+
+    @Override
+    public String toString(){
+        StringBuilder returnSB = new StringBuilder("{");
+        for (int i = 0; i < size - 1; i++){
+            returnSB.append(get(i).toString());
+            returnSB.append(", ");
+        }
+        returnSB.append(get(size - 1));
+        returnSB.append("}");
+        return returnSB.toString();
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return new ArrayDequeIterator();
+    }
+
+    private class ArrayDequeIterator implements Iterator<T> {
+        private int wizPos;
+
+        public ArrayDequeIterator(){
+            wizPos = 0;
+        }
+        @Override
+        public boolean hasNext() {
+            return wizPos < size;
+        }
+
+        public T next() {
+            T returnItem = get(wizPos);
+            wizPos++;
+            return returnItem;
+        }
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if (o instanceof ArrayDeque){
+            if(((ArrayDeque<?>) o).size != size){
+                return false;
+            }
+
+            for (T x : this){
+                if (!((ArrayDeque<?>) o).containsHelper(x)){
+                    return false;
+                }
+            }
+        } else {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean containsHelper(Object item){
+        for(T i:this){
+            if(item.equals(i)){
+                return true;
+            }
+        }
+        return false;
     }
 
     private int firstHelper(int first){

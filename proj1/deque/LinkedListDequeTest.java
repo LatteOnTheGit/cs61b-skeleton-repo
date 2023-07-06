@@ -130,4 +130,15 @@ public class LinkedListDequeTest {
 
     }
 
+    public static void main(String[] args){
+        Deque<Character> test = new LinkedListDeque<>();
+        Deque<Character> test2 = new LinkedListDeque<>();
+        test.addFirst('a');
+        test.addLast('z');
+        System.out.println(test.isEmpty());
+        System.out.println(test2.isEmpty());
+
+
+    }
+
 }
