@@ -169,7 +169,7 @@ public void addLast(T item){
 
     @Override
     public boolean equals(Object o){
-        if (o instanceof LinkedListDeque){
+        if (o instanceof Deque){
             if (((LinkedListDeque<?>) o).size != size){
                 return false;
             }
@@ -179,10 +179,10 @@ public void addLast(T item){
                     return false;
                 }
             }
+            return true;
         } else {
             return false;
         }
-        return true;
     }
 
     private boolean containsHelper(Object item){
@@ -197,7 +197,10 @@ public void addLast(T item){
     public T getRecursive(int index){
         if (index > size){
             return null;
-        } else {
+        } else if (index == 0){
+            return sentinel.next.item;
+        }
+        else {
             DoubleLink node = sentinel.next;
             return getRecursiveHelper(node,index);
         }

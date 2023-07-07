@@ -136,14 +136,17 @@ public class ArrayDequeTest {
     public void randomizedTest(){
         AListNoResizing<Integer> L = new AListNoResizing<>();
         ArrayDeque<Integer> T = new ArrayDeque<>();
+//        int firstcheckL =0, firstcheckT = 0, lastcheckL=0, lastcheckT =0 ;
         int N = 5000;
         for (int i = 0; i < N; i += 1) {
+
             int operationNumber = StdRandom.uniform(0, 3);
             if (operationNumber == 0) {
                 // addLast
                 int randVal = StdRandom.uniform(0, 100);
-                L.addLast(randVal);
-                T.addLast(randVal);
+                L.addFirst(randVal);
+                T.addFirst(randVal);
+
 //                System.out.println("addLast(" + randVal + ")");
             } else if (operationNumber == 1) {
                 // size
@@ -154,6 +157,7 @@ public class ArrayDequeTest {
             }  else if (operationNumber == 2 & L.size() > 0){
                 int removelast_item = L.removeLast();
                 int removelast_item_t = T.removeLast();
+
 //                System.out.println("removeLast : " + removelast_item);
                 assertEquals(removelast_item,removelast_item_t);
             }
@@ -167,6 +171,35 @@ public class ArrayDequeTest {
             ad1.addLast(i);
             assertEquals("Should have the same value", i, (double) ad1.get(i), 0.0);
         }
+
+    }
+
+    public static void main(String[] args){
+        Deque<Integer> test = new ArrayDeque<>();
+        AListNoResizing<Integer> test2 = new AListNoResizing<>();
+
+        for (int i = 0; i < 45; i++){
+            test.addFirst(i);
+            test2.addFirst(i);
+        }
+
+        for (int i = 0; i < 5; i++){
+            test.removeLast();
+            test2.removeLast();
+        }
+
+        for (int i = 0; i < 3; i++){
+            test.addFirst(i);
+            test2.addFirst(i);
+        }
+
+        for (int i = 0; i < 5; i++){
+            test.removeLast();
+            test2.removeLast();
+        }
+
+//        test2.printDeque();
+        test.printDeque();
 
     }
 }

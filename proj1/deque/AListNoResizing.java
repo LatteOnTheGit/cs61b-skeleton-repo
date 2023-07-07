@@ -8,7 +8,7 @@ public class AListNoResizing<T> {
     private int nextLast;
 
     public AListNoResizing(){
-        items = (T[])new Object[1000];
+        items = (T[])new Object[15];
         size = 0;
         nextLast = 0;
         nextFirst = items.length-1;
@@ -65,19 +65,30 @@ public class AListNoResizing<T> {
         return size;
     }
 
+//    public void printDeque(){
+//        if(!isEmpty()){
+////            print out First
+//            for(int index = nextFirst+1; index < items.length; index++){
+//                System.out.print(items[index] + " ");
+//            }
+////            what if not start at 0?
+//            for(int index = 0; index < nextLast; index++){
+//                System.out.print(items[index] + " ");
+//            }
+//        }
+//        System.out.println();
+//    }
+
     public void printDeque(){
-        if(!isEmpty()){
-//            print out First
-            for(int index = nextFirst+1; index < items.length; index++){
-                System.out.print(items[index] + " ");
-            }
-//            what if not start at 0?
-            for(int index = 0; index < nextLast; index++){
-                System.out.print(items[index] + " ");
-            }
+        StringBuilder printSB = new StringBuilder();
+        for(int i = 0; i < size - 1; i++){
+            printSB.append(get(i).toString());
+            printSB.append(" ");
         }
-        System.out.println();
+        printSB.append(get(size - 1));
+        System.out.println(printSB);
     }
+
 
     public T removeFirst(){
         if(isEmpty()){
@@ -110,6 +121,7 @@ public class AListNoResizing<T> {
                 size--;
             }
             T removed = items[nextLast];
+//            items[nextLast] = null;
 //            if(items.length > 15 && (double)size/items.length < 0.25){
 //                resize((int) Math.ceil(size * 1.6));
 //            }
@@ -117,13 +129,44 @@ public class AListNoResizing<T> {
         }
     }
 
+//    public T get(int index){
+//        if(index > size){
+//            return null;
+//        } else {
+//            int count = 1;
+//            if(lastHelper(nextLast) <= firstHelper(nextFirst)){
+//                for(int i = nextFirst + 1; i <= items.length; i++){
+//                    if(count == index){
+//                        return items[i];
+//                    }
+//                    count++;
+//                }
+//                for(int i = 0; i <= nextLast - 1; i++){
+//                    if(count == index){
+//                        return items[i];
+//                    }
+//                    count++;
+//                }
+//                return null;
+//            } else {
+//                for(int i = nextFirst + 1; i <= nextLast - 1; i++){
+//                    if(count == index){
+//                        return items[i];
+//                    }
+//                    count ++;
+//                }
+//                return null;
+//            }
+//        }
+//    }
+
     public T get(int index){
         if(index > size){
             return null;
         } else {
-            int count = 1;
-            if(lastHelper(nextLast) <= firstHelper(nextFirst)){
-                for(int i = nextFirst + 1; i <= items.length; i++){
+            int count = 0;
+            if(lastHelper(nextLast) < firstHelper(nextFirst)){
+                for(int i = nextFirst + 1; i <= items.length - 1; i++){
                     if(count == index){
                         return items[i];
                     }
@@ -137,7 +180,7 @@ public class AListNoResizing<T> {
                 }
                 return null;
             } else {
-                for(int i = nextFirst + 1; i <= nextLast - 1; i++){
+                for(int i = firstHelper(nextFirst); i <= lastHelper(nextLast); i++){
                     if(count == index){
                         return items[i];
                     }

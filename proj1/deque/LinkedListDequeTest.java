@@ -160,15 +160,12 @@ public class LinkedListDequeTest {
     }
 
     public static void main(String[] args){
-        LinkedListDeque<Integer> test = new LinkedListDeque<>();
-        for (int i = 0; i < 10; i++){
-            test.addLast(i);
-        }
+        Deque<Integer> test = new LinkedListDeque<>();
+        Deque<Integer> test2 = new LinkedListDeque<>();
+        test.addLast(1);
+        test2.addLast(2);
 
-
-        for (int i = 0; i < 10; i++){
-            System.out.println(test.removeLast());
-        }
+        System.out.println(test.equals(test2));
 
 
     }
