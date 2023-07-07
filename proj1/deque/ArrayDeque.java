@@ -43,11 +43,6 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         size = 0;
     }
 
-    public ArrayDeque(T T) {
-        this();
-        this.addFirst(T);
-    }
-
     private int increment(int n) {
         return Math.floorMod(n + 1, items.length);
     }
@@ -172,7 +167,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         return (float) size / items.length;
     }
 
-    public void resize() {
+    private void resize() {
         if (isFull()) {
             resizeHelper(items.length * 2);
         } else if (getUsageRatio() < 0.25 && items.length >= 16) {

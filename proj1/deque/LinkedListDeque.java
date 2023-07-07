@@ -4,7 +4,7 @@ import java.util.Iterator;
 
 public class LinkedListDeque<T> implements Iterable<T>,Deque<T>{
     private int size;
-    public DoubleLink sentinel;
+    private DoubleLink sentinel;
 
     private class DoubleLink{
         public T item;
