@@ -1,5 +1,6 @@
 package deque;
 
+import edu.princeton.cs.algs4.StdRandom;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -115,7 +116,7 @@ public class LinkedListDequeTest {
     /* Add large number of elements to deque; check if order is correct. */
     public void bigLLDequeTest() {
 
-        AListNoResizing<Integer> lld1 = new AListNoResizing<Integer>();
+        LinkedListDeque<Integer> lld1 = new LinkedListDeque<Integer>();
         for (int i = 0; i < 1000; i++) {
             lld1.addLast(i);
         }
@@ -130,13 +131,44 @@ public class LinkedListDequeTest {
 
     }
 
+    @Test
+    public void randomizedTest(){
+        AListNoResizing<Integer> L = new AListNoResizing<>();
+        LinkedListDeque<Integer> T = new LinkedListDeque<>();
+        int N = 50000;
+        for (int i = 0; i < N; i += 1) {
+            int operationNumber = StdRandom.uniform(0, 3);
+            if (operationNumber == 0) {
+                // addLast
+                int randVal = StdRandom.uniform(0, 100);
+                L.addLast(randVal);
+                T.addLast(randVal);
+//                System.out.println("addLast(" + randVal + ")");
+            } else if (operationNumber == 1) {
+                // size
+                int size = L.size();
+                int size_t = T.size();
+//                System.out.println("size: " + size);
+                assertEquals(size,size_t);
+            }  else if (operationNumber == 2 & L.size() > 0){
+                int removelast_item = L.removeFirst();
+                int removelast_item_t = T.removeFirst();
+//                System.out.println("removeLast : " + removelast_item);
+                assertEquals(removelast_item,removelast_item_t);
+            }
+        }
+    }
+
     public static void main(String[] args){
-        Deque<Character> test = new LinkedListDeque<>();
-        Deque<Character> test2 = new LinkedListDeque<>();
-        test.addFirst('a');
-        test.addLast('z');
-        System.out.println(test.isEmpty());
-        System.out.println(test2.isEmpty());
+        LinkedListDeque<Integer> test = new LinkedListDeque<>();
+        for (int i = 0; i < 10; i++){
+            test.addLast(i);
+        }
+
+
+        for (int i = 0; i < 10; i++){
+            System.out.println(test.removeLast());
+        }
 
 
     }

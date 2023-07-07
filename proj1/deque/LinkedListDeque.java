@@ -22,45 +22,65 @@ public class LinkedListDeque<T> implements Iterable<T>,Deque<T>{
      * first = sentinel.next
      * last = sentinel.pre
      */
-    public LinkedListDeque(T X){
-        sentinel = new DoubleLink(null,X,null);
-        sentinel.next = new DoubleLink(sentinel,X,sentinel);
-        sentinel.pre = sentinel.next;
-        size = 1;
-    }
+//    private LinkedListDeque(T X){
+//        sentinel = new DoubleLink(null,X,null);
+//        sentinel.next = new DoubleLink(sentinel,X,sentinel);
+//        sentinel.pre = sentinel.next;
+//        size = 1;
+//    }
 
     public LinkedListDeque(){
         sentinel = new DoubleLink(null,null,null);
-        sentinel.next = new DoubleLink(sentinel,null,sentinel);
+//        sentinel.next = new DoubleLink(sentinel,null,sentinel);
+        sentinel.next = sentinel;
         sentinel.pre = sentinel.next;
         size = 0;
     }
 
-    @Override
-    public void addFirst(T item){
-        if(isEmpty()){
-            sentinel.item = item;
-            sentinel.next.item = item;
-            size = 1;
-        } else {
-            sentinel.next = new DoubleLink(sentinel,item,sentinel.next);
-            sentinel.next.pre = sentinel.next;
-            size += 1;
-        }
-    }
+//    @Override
+//    public void addFirst(T item){
+//        if(isEmpty()){
+//            sentinel.item = item;
+//            sentinel.next.item = item;
+//            size = 1;
+//        } else {
+//            sentinel.next = new DoubleLink(sentinel,item,sentinel.next);
+//            sentinel.next.pre = sentinel.next;
+//            size += 1;
+//        }
+//    }
 
     @Override
-    public void addLast(T item){
-        if(isEmpty()){
-            sentinel.item = item;
-            sentinel.next.item = item;
-            size = 1;
-        } else {
-            sentinel.pre.next = new DoubleLink(sentinel.pre,item,sentinel);
-            sentinel.pre = sentinel.pre.next;
-            size += 1;
-        }
+    public void addFirst(T item){
+        /** Use circuit sentinel,
+         * invariant:
+         * first = sentinel.next
+         * last = sentinel.pre
+         */
+        DoubleLink temp = sentinel.next;
+        sentinel.next = new DoubleLink(sentinel,item,temp);
+        temp.pre = sentinel.next;
+        size += 1;
     }
+
+//    @Override
+//    public void addLast(T item){
+//        if(isEmpty()){
+//            sentinel.item = item;
+//            sentinel.next.item = item;
+//            size = 1;
+//        } else {
+//            sentinel.pre.next = new DoubleLink(sentinel.pre,item,sentinel);
+//            sentinel.pre = sentinel.pre.next;
+//            size += 1;
+//        }
+//    }
+@Override
+public void addLast(T item){
+    sentinel.pre.next = new DoubleLink(sentinel.pre,item,sentinel);
+    sentinel.pre = sentinel.pre.next;
+    size += 1;
+}
 
     @Override
     public int size(){

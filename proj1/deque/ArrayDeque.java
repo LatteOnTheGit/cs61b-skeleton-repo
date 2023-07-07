@@ -43,7 +43,7 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T>{
         size++;
     }
 
-    public void resize(int capacity){
+    private void resize(int capacity){
         T[] a = (T[]) new Object[capacity];
         if(lastHelper(nextLast) <= firstHelper((nextFirst))){
             System.arraycopy(items, nextFirst+1, a, 0, Math.max(0, items.length - nextFirst - 1));
@@ -144,8 +144,7 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T>{
         }
     }
 
-    @Override
-    public String toString(){
+    private String toStringHelper(){
         StringBuilder returnSB = new StringBuilder("{");
         for (int i = 0; i < size - 1; i++){
             returnSB.append(get(i).toString());
