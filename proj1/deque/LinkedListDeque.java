@@ -94,7 +94,7 @@ public class LinkedListDeque<T> implements Iterable<T>,Deque<T>{
             if(nodeT.next == sentinel){
                 returnSB.append(nodeT.item);
             } else {
-                returnSB.append(nodeT.item + " ")
+                returnSB.append(nodeT.item + " ");
             }
         }
         System.out.println(returnSB);
