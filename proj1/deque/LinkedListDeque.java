@@ -75,12 +75,12 @@ public class LinkedListDeque<T> implements Iterable<T>,Deque<T>{
 //            size += 1;
 //        }
 //    }
-@Override
-public void addLast(T item){
+    @Override
+    public void addLast(T item){
     sentinel.pre.next = new DoubleLink(sentinel.pre,item,sentinel);
     sentinel.pre = sentinel.pre.next;
     size += 1;
-}
+    }
 
     @Override
     public int size(){
@@ -90,14 +90,12 @@ public void addLast(T item){
     @Override
     public void printDeque(){
         StringBuilder returnSB = new StringBuilder();
-        if(!isEmpty()){
-            for(int i = 0; i < size - 1; i++){
-                returnSB.append(this.get(i));
-                returnSB.append(" ");
+        for(DoubleLink nodeT = sentinel.next; nodeT != sentinel ; nodeT = nodeT.next){
+            if(nodeT.next == sentinel){
+                returnSB.append(nodeT.item);
+            } else {
+                returnSB.append(nodeT.item + " ")
             }
-            returnSB.append(this.get(size - 1));
-        } else {
-            System.out.println();
         }
         System.out.println(returnSB);
     }
@@ -131,7 +129,7 @@ public void addLast(T item){
 
     @Override
     public T get(int index){
-        if (index > size){
+        if (index >= size || index < 0){
             return null;
         } else {
             DoubleLink pointer = sentinel.next;
@@ -169,36 +167,35 @@ public void addLast(T item){
 
     @Override
     public boolean equals(Object o){
-        if (o instanceof Deque){
+        if (o instanceof Deque<?>){
             if (((LinkedListDeque<?>) o).size != size){
                 return false;
             }
 
-            for (T i:this){
-                if (!((LinkedListDeque<?>) o).containsHelper(i)){
+            for (int i = 0; i < size; i ++){
+                if (!(get(i).equals(((LinkedListDeque<?>) o).get(i)))){
                     return false;
                 }
+
             }
             return true;
-        } else {
-            return false;
         }
+        return false;
+
     }
 
     private boolean containsHelper(Object item){
         for(T i : this){
-            if (item.equals(i)){
-                return true;
+            if (!item.equals(i)){
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     public T getRecursive(int index){
-        if (index > size){
+        if (index >= size || index < 0){
             return null;
-        } else if (index == 0){
-            return sentinel.next.item;
         }
         else {
             DoubleLink node = sentinel.next;
@@ -207,7 +204,7 @@ public void addLast(T item){
     }
 
     private T getRecursiveHelper(DoubleLink node,int index){
-        if(index == 1){
+        if(index == 0){
             return node.item;
         } else {
             return getRecursiveHelper(node.next,index - 1);
