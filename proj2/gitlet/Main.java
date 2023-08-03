@@ -1,24 +1,78 @@
 package gitlet;
 
+import java.io.File;
+import java.io.IOException;
+import static gitlet.Utils.*;
+
 /** Driver class for Gitlet, a subset of the Git version-control system.
- *  @author TODO
+ *  @author Latte
  */
 public class Main {
 
     /** Usage: java gitlet.Main ARGS, where ARGS contains
      *  <COMMAND> <OPERAND1> <OPERAND2> ... 
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         // TODO: what if args is empty?
         String firstArg = args[0];
         switch(firstArg) {
             case "init":
                 // TODO: handle the `init` command
+                if(Repository.GITLET_DIR.exists()) {
+                    System.out.println("A Gitlet version-control system already exists in the current directory.");
+                    break;
+                }
+                RepoControl.init();
                 break;
             case "add":
-                // TODO: handle the `add [filename]` command
+                String FileName = args[1];
+                File theFile = join(Repository.CWD,FileName);
+                if(!theFile.exists()) {
+                    System.out.println("File does not exist.");
+                    break;
+                }
+                RepoControl.add(FileName);
                 break;
-            // TODO: FILL THE REST IN
+            case "commit":
+                if (args.length == 1) {
+                    System.out.println("Please enter a commit message.");
+                    break;
+                }
+                String message = args[1];
+                String[] files = Repository.addition.list();
+                if (files == null || files.length == 0) {
+                    System.out.println("No changes added to the commit.");
+                    break;
+                }
+                RepoControl.commit(message);
+                break;
+            case "log":
+                RepoControl.log();
+                break;
+            case "checkout":
+                int out = -1;
+                if (args.length == 3) {
+                    out = RepoControl.checkout(args[2]);
+                } else if (args.length == 4) {
+                    out = RepoControl.checkout(args[1], args[3]);
+                }
+                switch (out) {
+                    case -1:
+                        System.out.println("wrong input, format: checkout [ID][Filename]");
+                        break;
+                    case 0:
+                        break;
+                    case 1:
+                        System.out.println("File does not exist in that commit.");
+                        break;
+                    case 2:
+                        System.out.println("No commit with that id exists.");
+                        break;
+                }
+
+
+
+
         }
     }
 }

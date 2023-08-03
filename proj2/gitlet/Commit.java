@@ -1,26 +1,67 @@
 package gitlet;
 
-// TODO: any imports you need here
-
-import java.util.Date; // TODO: You'll likely use this in this class
+import java.io.File;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Formatter;
+import java.util.HashMap;
+import java.util.List;
+import static gitlet.Utils.*;
+import java.util.Locale;
 
 /** Represents a gitlet commit object.
- *  TODO: It's a good idea to give a description here of what else this Class
+ *  Should contains: SHA1 uid(of the folder contains every thing inside the staging area),
+ *  file to its version map, timestamp, and also message.
+ *
+ *  Persistence: should create a Folder named uid,
+ *  and save commit object that contains All info of latest pre-commit(maybe inside map),
  *  does at a high level.
  *
- *  @author TODO
+ *  @author Latte
  */
-public class Commit {
-    /**
-     * TODO: add instance variables here.
-     *
-     * List all instance variables of the Commit class here with a useful
-     * comment above them describing what that variable represents and how that
-     * variable is used. We've provided one example for `message`.
-     */
+public class Commit implements Serializable {
+    /** refer FilesName to its SHA1; */
+    public HashMap<String, String> monitoredFiles= new HashMap<>();
 
-    /** The message of this Commit. */
-    private String message;
+    private String message, timestamp;
 
-    /* TODO: fill in the rest of this class. */
+    public Commit() {
+        Date date = new Date(0);
+        timestamp = dateSolver(date);
+        message = "initial commit";
+    }
+
+    public void addFromStaging(String message) {
+        List<String> files = Utils.plainFilenamesIn(Repository.addition);
+        for(String file:files) {
+            File curFile = join(Repository.addition, file);
+            byte[] content = readContents(curFile);
+            String SHA1File = sha1(content);
+            monitoredFiles.put(file, SHA1File);
+
+        }
+        this.timestamp = dateSolver(new Date());
+        this.message = message;
+    }
+
+
+    public String getMessage() {
+        return this.message;
+    }
+
+    public String getTimestamp() {
+        return this.timestamp;
+    }
+
+    private static String getSHA1(Serializable obj) {
+        byte[] content = Utils.serialize(obj);
+        return Utils.sha1(content);
+    }
+
+    private String dateSolver(Date time) {
+        Formatter formatter = new Formatter(Locale.US);
+        formatter.format("%ta %tb %td %tT %tY %tz", time, time, time, time, time, time);
+        return formatter.toString();
+    }
+
 }
