@@ -36,14 +36,14 @@ public class RepoControl {
         if (!Repo.commitsRela.containsKey(commitID)) {
             return 2;
         }
-        String theID = Repo.fileVersion.get(fileName);
+//        String theID = Repo.fileVersion.get(fileName);
         if (Repo.checkout(commitID, fileName)) return 0;
         else return 1;
     }
 
     public static int checkout(String fileName) {
         Repository Repo = reloadRepo();
-        return checkout(Repo.HEAD, fileName);
+        return checkout(Repo.Pointer.get(Repo.HEAD), fileName);
     }
 
     private static Repository reloadRepo() {
