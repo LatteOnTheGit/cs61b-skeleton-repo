@@ -2,6 +2,8 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+
 import static gitlet.Utils.*;
 
 
@@ -41,9 +43,36 @@ public class RepoControl {
         else return 1;
     }
 
-    public static int checkout(String fileName) {
+    public static int checkoutHEAD(String fileName) {
         Repository Repo = reloadRepo();
         return checkout(Repo.Pointer.get(Repo.HEAD), fileName);
+    }
+
+    public static int checkoutBranch(String branchName) {
+        Repository Repo = reloadRepo();
+        if(!Repo.Pointer.containsKey(branchName)) return 3;
+        if(Repo.HEAD.equals(branchName)) return 4;
+        int out = Repo.checkout(branchName) ? 0 : 5;
+        writeObject(commitRelation, Repo);
+        return out;
+
+    }
+
+    public static boolean branch(String branchName) {
+        Repository Repo = reloadRepo();
+        if (Repo.Pointer.containsKey(branchName)) return false;
+        Repo.branch(branchName);
+        writeObject(commitRelation, Repo);
+        return true;
+    }
+
+    public static int rmBranch(String branchName) {
+        Repository Repo = reloadRepo();
+        if (!Repo.Pointer.containsKey(branchName)) return 0;
+        if (Repo.HEAD.equals(branchName)) return 1;
+        Repo.rmBranch(branchName);
+        writeObject(commitRelation, Repo);
+        return 2;
     }
 
     private static Repository reloadRepo() {

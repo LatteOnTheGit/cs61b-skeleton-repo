@@ -5,10 +5,7 @@ import static gitlet.Utils.*;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 // TODO: any imports you need here
 
 /** Represents a gitlet repository.
@@ -65,8 +62,9 @@ public class Repository implements Serializable {
 //    ArrayList<String> Pointers;
     HashMap<String, String> Pointer = new HashMap<>(); // refer Branchname to commitID
 //    String HEAD, master;
+
+    String HEAD;
     String curBranch;
-    final String HEAD = "HEAD";
 
     /** The current working directory. */
 
@@ -102,10 +100,11 @@ public class Repository implements Serializable {
         String curSHA = getSHA1(curCommit);
         commitsRela.put(curSHA,"-1");
 //        HEAD = curSHA;
-        Pointer.put(HEAD,curSHA);
+//        Pointer.put(HEAD,curSHA);
 //        master = curSHA;
         Pointer.put("master",curSHA);
         curBranch = "master";
+        HEAD = curBranch;
         HashMap<String, String> version = new HashMap<>();
         saveVersions(version, curSHA);
         // save to commits Named SHA1, content serialized
@@ -116,10 +115,14 @@ public class Repository implements Serializable {
 
     }
 
+
+
+    // new add file
 //    public void addFile(String fileName) throws IOException {
 //        File theFile = join(CWD,fileName);
 //        byte[] fileContent = Utils.readContents(theFile);
 //        String SHA1File = Utils.sha1(fileContent);
+//        HashMap<String, String> fileVersion = getVersion(Pointer.get(HEAD));
 //        String latestVersionCommitID = fileVersion.get(fileName);
 //        // test use
 ////        System.out.println("sha1 when add is :" + SHA1File);
@@ -133,33 +136,46 @@ public class Repository implements Serializable {
 //        writeContents(saveFile, fileContent);
 //    }
 
-    // new add file
+    //new addFile()
     public void addFile(String fileName) throws IOException {
         File theFile = join(CWD,fileName);
         byte[] fileContent = Utils.readContents(theFile);
         String SHA1File = Utils.sha1(fileContent);
         HashMap<String, String> fileVersion = getVersion(Pointer.get(HEAD));
-        String latestVersionCommitID = fileVersion.get(fileName);
-        // test use
-//        System.out.println("sha1 when add is :" + SHA1File);
-        if(latestVersionCommitID != null) {
-            Commit latestVersionCommit = readCommit(latestVersionCommitID);
-            String latestVersion = latestVersionCommit.monitoredFiles.get(fileName);
-            if(latestVersion.equals(SHA1File)) return;
+//        String latestVersionCommitID = fileVersion.get(fileName);
+//        // test use
+////        System.out.println("sha1 when add is :" + SHA1File);
+//        if(latestVersionCommitID != null) {
+//            Commit latestVersionCommit = readCommit(latestVersionCommitID);
+//            String latestVersion = latestVersionCommit.monitoredFiles.get(fileName);
+//            if(latestVersion.equals(SHA1File)) return;
+//        }
+        if (fileVersion.containsKey(fileName)) {
+            String latestVersion = fileVersion.get(fileName);
+            if( SHA1File.equals(latestVersion)) return;
         }
         File saveFile = join(addition,fileName);
         saveFile.createNewFile();
         writeContents(saveFile, fileContent);
     }
 
-    //old commit
+
+
+    // old commit files
 //    public void commitFiles(String message) throws IOException {
 //        // ignore rm
 //        Commit curCommit = new Commit();
 //        curCommit.addFromStaging(message);
 //        String SHA1Curcommit = getSHA1(curCommit);
+//        HashMap<String, String> fileVersion = getVersion(Pointer.get(HEAD));
 //        Set<String> filesOnTrack = curCommit.monitoredFiles.keySet();
-//        for(String file:filesOnTrack) {
+//        List<String> filesUpRemoval = Utils.plainFilenamesIn(Repository.removal);
+//        for (String file:filesUpRemoval) {
+//            fileVersion.remove(file);
+//            File deletRemoval = join(removal, file);
+//            deletRemoval.delete();
+//        }
+//        for (String file:filesOnTrack) {
 //            fileVersion.put(file, SHA1Curcommit);
 //            File deleteFile = join(addition, file);
 //            String SHA1File = curCommit.monitoredFiles.get(file);
@@ -172,14 +188,17 @@ public class Repository implements Serializable {
 //            // use io delete for test
 //            deleteFile.delete();
 //        }
-//        commitsRela.put(SHA1Curcommit, HEAD);
-//        HEAD = SHA1Curcommit;
+//        commitsRela.put(SHA1Curcommit, Pointer.get(HEAD));
+////        HEAD = SHA1Curcommit;
+////        Pointer.put(HEAD,SHA1Curcommit);
 //        // to be changed to branch name pluger
-//        master = HEAD;
+////        master = HEAD;
+//        Pointer.put(curBranch,SHA1Curcommit);
+//        HEAD = curBranch;
 //        saveCommit(curCommit, SHA1Curcommit);
+//        saveVersions(fileVersion, SHA1Curcommit);
 //    }
-
-    // new commit files
+    //new commit
     public void commitFiles(String message) throws IOException {
         // ignore rm
         Commit curCommit = new Commit();
@@ -194,9 +213,10 @@ public class Repository implements Serializable {
             deletRemoval.delete();
         }
         for (String file:filesOnTrack) {
-            fileVersion.put(file, SHA1Curcommit);
+//            fileVersion.put(file, SHA1Curcommit);
             File deleteFile = join(addition, file);
             String SHA1File = curCommit.monitoredFiles.get(file);
+            fileVersion.put(file, SHA1File);
             File blobFile = join(Blobs, SHA1File);
             byte[] fileContent = readContents(deleteFile);
             // to be add serialized content there or on add file
@@ -208,13 +228,15 @@ public class Repository implements Serializable {
         }
         commitsRela.put(SHA1Curcommit, Pointer.get(HEAD));
 //        HEAD = SHA1Curcommit;
-        Pointer.put(HEAD,SHA1Curcommit);
+//        Pointer.put(HEAD,SHA1Curcommit);
         // to be changed to branch name pluger
 //        master = HEAD;
         Pointer.put(curBranch,SHA1Curcommit);
+        HEAD = curBranch;
         saveCommit(curCommit, SHA1Curcommit);
         saveVersions(fileVersion, SHA1Curcommit);
     }
+
 
     //without worrying about merge situation
     public StringBuilder log() {
@@ -252,9 +274,9 @@ public class Repository implements Serializable {
     public boolean checkout(String commitID, String fileName) {
         HashMap<String, String> filesVersion = getVersion(commitID);
         if(!filesVersion.containsKey(fileName)) return false;
-        String fileAtCommitID = filesVersion.get(fileName);
-        Commit checkCommit = readCommit(fileAtCommitID);
-        String SHA1File = checkCommit.monitoredFiles.get(fileName);
+//        String fileAtCommitID = filesVersion.get(fileName);
+//        Commit checkCommit = readCommit(fileAtCommitID);
+        String SHA1File = filesVersion.get(fileName);
         File blobsFile = join(Blobs, SHA1File);
         byte[] content = readContents(blobsFile);
         File toWrite = join(CWD, fileName);
@@ -262,8 +284,59 @@ public class Repository implements Serializable {
         return true;
     }
 
-    public boolean checkout(String fileName) {
-        return checkout(Pointer.get(HEAD), fileName);
+//    public boolean checkout(String fileName) {
+//        return checkout(Pointer.get(HEAD), fileName);
+//    }
+    public boolean checkout(String branchName) {
+        // check untracked files
+        String SHA1Commit = Pointer.get(branchName); //SHA1 code of a commit
+        HashMap<String, String> filesVersion = getVersion(SHA1Commit);
+        List<String> filesCWD = Utils.plainFilenamesIn(CWD);
+        List<String> filesAddition = plainFilenamesIn(addition);
+        // current branch tracked file
+        String SHA1commitCurrent = Pointer.get(HEAD);
+        HashMap<String, String> filesVersionCurrent = getVersion(SHA1commitCurrent);
+        Set<String> tracked = filesVersionCurrent.keySet();
+        Set<String> stagedAdd = new HashSet<>(tracked);
+        for (String file:filesCWD) {
+            if (!filesAddition.contains(file) && !stagedAdd.contains(file)) return false;
+        }
+        //unsafe delete
+        // SAFE Delete
+        HashMap<String, String> filesVersionPre = getVersion(Pointer.get(HEAD));
+        // could be a better way? may use Ifremove set::constain
+        for (String file:filesVersionPre.keySet()) {
+            File deleteFile = join(CWD, file);
+            deleteFile.delete();
+        }
+        for (String file:filesVersion.keySet()) {
+            String SHA1File = filesVersion.get(file);
+            File checkoutFile = join(Blobs, SHA1File);
+            byte[] content = readContents(checkoutFile);
+            File toWriteFile = join(CWD, file);
+            writeContents(toWriteFile, content);
+        }
+        //need to clear staging
+        for (File file : addition.listFiles()) {
+            file.delete();
+        }
+        for (File file : removal.listFiles()) {
+            file.delete();
+        }
+        // reset HEAD Pointer
+        curBranch = branchName;
+        HEAD = curBranch;
+        return true;
+
+    }
+
+    public void branch(String branchName) {
+        String haedCommitId = Pointer.get(HEAD);
+        Pointer.put(branchName, haedCommitId);
+    }
+
+    public void rmBranch(String branchName) {
+        Pointer.remove(branchName);
     }
 
     private static Commit readCommit(String SHA1Code) {

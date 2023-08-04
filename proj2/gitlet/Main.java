@@ -51,8 +51,11 @@ public class Main {
                 break;
             case "checkout":
                 int out = -1;
-                if (args.length == 3) {
-                    out = RepoControl.checkout(args[2]);
+                if (args.length == 2) {
+                    out = RepoControl.checkoutBranch(args[1]);
+                }
+                else if (args.length == 3) {
+                    out = RepoControl.checkoutHEAD(args[2]);
                 } else if (args.length == 4) {
                     out = RepoControl.checkout(args[1], args[3]);
                 }
@@ -67,6 +70,36 @@ public class Main {
                         break;
                     case 2:
                         System.out.println("No commit with that id exists.");
+                        break;
+                    case 3:
+                        System.out.println("No such branch exists.");
+                        break;
+                    case 4:
+                        System.out.println("No need to checkout the current branch.");
+                        break;
+                    case 5:
+                        System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                        break;
+                }
+                break;
+            case "branch":
+                String branchName = args[1];
+                if (!RepoControl.branch(branchName)) {
+                    System.out.println("A branch with that name already exists.");
+                    break;
+                }
+                break;
+            case "rm-branch":
+                String rmBranchName = args[1];
+                int rmOut = RepoControl.rmBranch(rmBranchName);
+                switch (rmOut) {
+                    case 0:
+                        System.out.println("A branch with that name does not exist.");
+                        break;
+                    case 1:
+                        System.out.println("Cannot remove the current branch.");
+                        break;
+                    case 2:
                         break;
                 }
 
