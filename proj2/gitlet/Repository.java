@@ -1,5 +1,6 @@
 package gitlet;
 
+
 import java.io.File;
 import static gitlet.Utils.*;
 
@@ -284,9 +285,29 @@ public class Repository implements Serializable {
         return true;
     }
 
-//    public boolean checkout(String fileName) {
-//        return checkout(Pointer.get(HEAD), fileName);
-//    }
+    // to be abort
+    public boolean rm(String fileName) throws IOException {
+        List<String> filesAddition = plainFilenamesIn(addition);
+        // current branch tracked file
+        String SHA1commitCurrent = Pointer.get(HEAD);
+        HashMap<String, String> filesVersionCurrent = getVersion(SHA1commitCurrent);
+        Set<String> tracked = filesVersionCurrent.keySet();
+        Set<String> stagedAdd = new HashSet<>(filesAddition);
+        if (!tracked.contains(fileName) && !stagedAdd.contains(fileName)) return false;
+        if (stagedAdd.contains(fileName)) {
+            File deleteAdd = join(addition, fileName);
+            deleteAdd.delete();
+        }
+        if (tracked.contains(fileName)) {
+            File removalFile = join(removal, fileName);
+            removalFile.createNewFile();
+            File deletFileCWD = join(CWD, fileName);
+            deletFileCWD.delete();
+
+        }
+        return true;
+    }
+
     public boolean checkout(String branchName) {
         // check untracked files
         String SHA1Commit = Pointer.get(branchName); //SHA1 code of a commit
@@ -297,9 +318,9 @@ public class Repository implements Serializable {
         String SHA1commitCurrent = Pointer.get(HEAD);
         HashMap<String, String> filesVersionCurrent = getVersion(SHA1commitCurrent);
         Set<String> tracked = filesVersionCurrent.keySet();
-        Set<String> stagedAdd = new HashSet<>(tracked);
+        Set<String> stagedAdd = new HashSet<>(filesAddition);
         for (String file:filesCWD) {
-            if (!filesAddition.contains(file) && !stagedAdd.contains(file)) return false;
+            if (!tracked.contains(file) && !stagedAdd.contains(file)) return false;
         }
         //unsafe delete
         // SAFE Delete

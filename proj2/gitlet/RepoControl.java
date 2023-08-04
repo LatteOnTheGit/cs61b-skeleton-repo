@@ -22,10 +22,14 @@ public class RepoControl {
         Repo.addFile(fileName);
     }
 
-    public static void commit(String message) throws IOException {
+    public static boolean commit(String message) throws IOException {
         Repository Repo = reloadRepo();
+        String[] filesAdd = Repository.addition.list();
+        String[] filesRm = Repository.removal.list();
+        if ((filesAdd == null || filesAdd.length == 0) && (filesRm == null || filesRm.length == 0)) return false;
         Repo.commitFiles(message);
         writeObject(commitRelation, Repo);
+        return true;
     }
 
     public static void log() {
@@ -73,6 +77,12 @@ public class RepoControl {
         Repo.rmBranch(branchName);
         writeObject(commitRelation, Repo);
         return 2;
+    }
+
+    public static boolean rm(String fileName) throws IOException {
+        Repository Repo = reloadRepo();
+        if(!Repo.rm(fileName)) return false;
+        return true;
     }
 
     private static Repository reloadRepo() {

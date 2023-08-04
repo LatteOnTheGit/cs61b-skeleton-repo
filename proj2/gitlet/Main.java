@@ -39,12 +39,10 @@ public class Main {
                     break;
                 }
                 String message = args[1];
-                String[] files = Repository.addition.list();
-                if (files == null || files.length == 0) {
+                if (!RepoControl.commit(message)) {
                     System.out.println("No changes added to the commit.");
                     break;
                 }
-                RepoControl.commit(message);
                 break;
             case "log":
                 RepoControl.log();
@@ -102,7 +100,11 @@ public class Main {
                     case 2:
                         break;
                 }
-
+                break;
+            case "rm":
+                String fileName = args[1];
+                if (RepoControl.rm(fileName)) break;
+                else System.out.println("No reason to remove the file.");
 
 
 
