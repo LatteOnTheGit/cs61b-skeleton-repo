@@ -105,7 +105,10 @@ public class Main {
                 String fileName = args[1];
                 if (RepoControl.rm(fileName)) break;
                 else System.out.println("No reason to remove the file.");
-
+                break;
+            case "status":
+                RepoControl.status();
+                break;
 
 
         }

@@ -79,6 +79,12 @@ public class RepoControl {
         return 2;
     }
 
+    public static void status() {
+        Repository Repo = reloadRepo();
+        StringBuilder out = Repo.status();
+        System.out.println(out);
+    }
+
     public static boolean rm(String fileName) throws IOException {
         Repository Repo = reloadRepo();
         if(!Repo.rm(fileName)) return false;

@@ -260,6 +260,36 @@ public class Repository implements Serializable {
         return res;
     }
 
+    public StringBuilder status() {
+        StringBuilder res = new StringBuilder();
+        List<String> branchNames = new ArrayList<>(Pointer.keySet());
+        Collections.sort(branchNames);
+        List<String> filesStagedAddition = plainFilenamesIn(addition);
+        Collections.sort(filesStagedAddition);
+        List<String> filesStagedRemoval = plainFilenamesIn(removal);
+        Collections.sort(filesStagedRemoval);
+        res.append("=== Branches ===");
+        for (String branch : branchNames) {
+            res.append("\n");
+            if (branch.equals(HEAD)) {
+                res.append("*");
+            }
+            res.append(branch);
+        }
+        res.append("\n").append("\n=== Staged Files ===");
+        for (String file : filesStagedAddition) {
+            res.append("\n").append(file);
+        }
+        res.append("\n").append("\n=== Removed Files ===");
+        for (String file : filesStagedRemoval) {
+            res.append("\n").append(file);
+        }
+        res.append("\n").append("\n=== Modifications Not Staged For Commit ===");
+        res.append("\n").append("\n=== Untracked Files ===");
+        res.append("\n");
+        return res;
+    }
+
 //    public boolean checkout(String commitID, String fileName) {
 //        Commit checkCommit = readCommit(commitID);
 //        String SHA1File = checkCommit.monitoredFiles.get(fileName);
