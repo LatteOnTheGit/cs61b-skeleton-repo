@@ -62,7 +62,8 @@ public class Repository implements Serializable {
     HashMap<String, String> commitsRela = new HashMap<>(); //, fileVersion = new HashMap<>();
 //    ArrayList<String> Pointers;
     HashMap<String, String> Pointer = new HashMap<>(); // refer Branchname to commitID
-//    String HEAD, master;
+
+    HashMap<String, ArrayDeque<String>> merged = new HashMap<>(); // refer first branch to second branch;
 
     String HEAD;
     String curBranch;
@@ -253,9 +254,15 @@ public class Repository implements Serializable {
             res.append("===\n");
             res.append("commit ").append(curTempPointer).append("\n");
             Commit Curcommit = readCommit(curTempPointer);
+            String preTempPointer = commitsRela.get(curTempPointer);
+            // because log in repoControl not save Repo, we modify merged directly
+            if (!merged.isEmpty() && merged.containsKey(preTempPointer) && !merged.get(preTempPointer).isEmpty()) {
+                String secondParent = merged.get(preTempPointer).poll();
+                res.append("Merge: ").append(preTempPointer.substring(0,7)).append(" ").append(secondParent.substring(0,7)).append("\n");
+            }
             res.append("Date: ").append(Curcommit.getTimestamp()).append("\n");
             res.append(Curcommit.getMessage()).append("\n");
-            curTempPointer = commitsRela.get(curTempPointer);
+            curTempPointer = preTempPointer;
         }
         return res;
     }
@@ -388,6 +395,135 @@ public class Repository implements Serializable {
 
     public void rmBranch(String branchName) {
         Pointer.remove(branchName);
+    }
+
+    public int mergeCheck() {
+        List<String> filesAdd = plainFilenamesIn(addition), filesRemoval = plainFilenamesIn(removal);
+        if (filesAdd.size() != 0 || filesRemoval.size() != 0) return -1;
+        List<String> filesPWD = plainFilenamesIn(CWD);
+        String hashHead = Pointer.get(HEAD);
+        HashMap<String, String> filesVersion = getVersion(hashHead);
+        Set<String> tracked = filesVersion.keySet();
+        for (String fileName : filesPWD) {
+            if (!tracked.contains(fileName)) return -2;
+        }
+        return 0;
+    }
+
+    public void merge(String hashOther, String mergePoint) throws IOException {
+        String hashCur = Pointer.get(HEAD);
+        HashMap<String, String> filesCur = getVersion(hashCur), filesOther = getVersion(hashOther), filesMp = getVersion(mergePoint);
+        // fileNames with all file name appears in HEAD, mergePoint and Other;
+        Set<String> fileNames = new HashSet<>();
+        fileNames.addAll(filesCur.keySet());
+        fileNames.addAll(filesOther.keySet());
+        fileNames.addAll(filesMp.keySet());
+        boolean isConflict = false;
+        for (String file : fileNames) {
+            // if file not in split
+            if (!filesMp.containsKey(file)) {
+                // if file not in HEAD: checkout & addFile (file in branch);
+                if (!filesCur.containsKey(file)) {
+                    checkout(hashOther, file);
+                    addFile(file);
+                } else if (filesOther.containsKey(file)) {
+                    // else if file in branch: deal conflict;
+                    if (conflict(filesCur.get(file), filesOther.get(file), file)) {
+                        addFile(file);
+                        isConflict = true;
+                    }
+                }
+            } else {
+                // if not in HEAD & modified in branch:
+                if (!filesCur.containsKey(file) && !filesMp.get(file).equals(filesOther.get(file))) {
+                    // checkout & addFile (file in branch);
+//                    checkout(hashOther, file);
+                    conflictDelete(true, filesOther.get(file), file);
+                    addFile(file);
+                    isConflict = true;
+                    // else if file in HEAD and unmodified:
+                } else if (filesCur.containsKey(file) && filesMp.get(file).equals(filesCur.get(file))) {
+                    // if file not in branch:
+                    if (!filesOther.containsKey(file)) {
+                        // add file to removal;
+                        rm(file);
+                        // if file in branch & modified: checkout and addFile(file in branch);
+                    } else if (!filesMp.get(file).equals(filesOther.get(file))) {
+                        checkout(hashOther, file);
+                        addFile(file);
+                    }
+                } else if (filesCur.containsKey(file) && !filesMp.get(file).equals(filesCur.get(file))) {
+                    if (filesOther.containsKey(file) && !filesMp.get(file).equals(filesOther.get(file))) {
+                        if (conflict(filesCur.get(file), filesOther.get(file), file)) {
+                            addFile(file);
+                            isConflict = true;
+                        }
+                    } else if (!filesOther.containsKey(file)) {
+                        conflictDelete(false, filesCur.get(file), file);
+                        addFile(file);
+                        isConflict = true;
+                    }
+                }
+            }
+        }
+        if (isConflict) System.out.println("Encountered a merge conflict.");
+        // should add commit at RepoControl;
+        // resolve log merge commits and global log
+        merged.computeIfAbsent(hashCur, k -> new ArrayDeque<String>()).offer(hashOther);
+
+    }
+
+    public String[] mergeBase(String branchName1, String branchName2) {
+        String firstPointer = Pointer.get(branchName1);
+        String secondPointer = Pointer.get(branchName2);
+        String[] res = new String[3];
+        res[0] = firstPointer;
+        res[1] = secondPointer;
+        if (firstPointer.equals(secondPointer)) {
+            res[2] = firstPointer;
+            return res;
+        }
+        Set<String> commitPath = new HashSet<>();
+        while (!firstPointer.equals("-1")) {
+            commitPath.add(firstPointer);
+            firstPointer = commitsRela.get(firstPointer);
+        }
+        while (!commitPath.contains(secondPointer)) {
+            secondPointer = commitsRela.get(secondPointer);
+        }
+        res[2] = secondPointer;
+        return res;
+    }
+
+    // removed = true if curFile is deleted
+    private void conflictDelete(boolean removedFirst, String hashFile, String fileName) {
+        File theFile = join(Blobs, hashFile), out = join(CWD, fileName);
+        String content = readContentsAsString(theFile);
+        StringBuilder res = new StringBuilder("<<<<<<< HEAD\n");
+        if (!removedFirst) {
+            res.append(content);
+        }
+        res.append("=======\n");
+        if (removedFirst) {
+            res.append(content);
+        }
+        res.append(">>>>>>>");
+        writeContents(out, res.toString());
+    }
+
+    // check contents of file, if same remain unchanged return false;
+    // else concate 2 file in format and re-write it in CWD with fileName;
+    // return true;
+    private boolean conflict(String hashCurFile, String hashOtherFile, String fileName) {
+        File first = join(Blobs, hashCurFile), second = join(Blobs, hashOtherFile), out = join(CWD, fileName);
+        if (hashCurFile.equals(hashOtherFile)) {
+            return false;
+        }
+        StringBuilder res = new StringBuilder("<<<<<<< HEAD\n");
+        String contentFirst = readContentsAsString(first), contentSecond = readContentsAsString(second);
+        res.append(contentFirst).append("=======\n").append(contentSecond).append(">>>>>>>");
+        writeContents(out, res.toString());
+        return true;
     }
 
     private static Commit readCommit(String SHA1Code) {

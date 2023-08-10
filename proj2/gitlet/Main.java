@@ -109,7 +109,32 @@ public class Main {
             case "status":
                 RepoControl.status();
                 break;
-
+            case "merge":
+                String branchNameMerge = args[1];
+                int mergeOut = RepoControl.merge(branchNameMerge);
+                switch (mergeOut) {
+                    case 0:
+                        break;
+                    case 1:
+                        System.out.println("A branch with that name does not exist.");
+                        break;
+                    case 2:
+                        System.out.println("Cannot merge a branch with itself.");
+                        break;
+                    case 3:
+                        System.out.println("Given branch is an ancestor of the current branch.");
+                        break;
+                    case 4:
+                        System.out.println("Current branch fast-forwarded.");
+                        break;
+                    case -1:
+                        System.out.println("You have uncommitted changes.");
+                        break;
+                    case -2:
+                        System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                        break;
+                }
+                break;
 
         }
     }

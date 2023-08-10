@@ -91,6 +91,31 @@ public class RepoControl {
         return true;
     }
 
+    public static int merge(String branchName) throws IOException {
+        Repository Repo = reloadRepo();
+        if (Repo.HEAD.equals(branchName)) return 2;
+        if(!Repo.Pointer.containsKey(branchName)) return 1;
+        int out = Repo.mergeCheck();
+        if (out != 0) return out;
+        String[] mergePoints = Repo.mergeBase(Repo.HEAD, branchName);
+        // split point is the same commit as the given branch
+        if (mergePoints[2].equals(mergePoints[1])) return 3;
+        // If the split point is the current branch
+        if (mergePoints[2].equals(mergePoints[0])) {
+            checkoutBranch(branchName);
+            return 4;
+        }
+        Repo.merge(mergePoints[1], mergePoints[2]);
+        StringBuilder logMessage = new StringBuilder("Merged ");
+        logMessage.append(branchName).append(" into ").append(Repo.HEAD);
+        writeObject(commitRelation, Repo);
+        if (!RepoControl.commit(logMessage.toString())) {
+            System.out.println("No changes added to the commit.");
+        }
+//        writeObject(commitRelation, Repo);
+        return 0;
+    }
+
     private static Repository reloadRepo() {
         Repository Repo = Utils.readObject(commitRelation, Repository.class);
         return Repo;
